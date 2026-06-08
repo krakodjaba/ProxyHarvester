@@ -183,7 +183,7 @@ async def check_one(
         return None
     if latency > int(max_latency_s * 1000):
         return None
-    return node.with_latency(latency)
+    return node.with_latency(latency).enrich_country()
 
 
 async def check_all(

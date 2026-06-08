@@ -19,7 +19,7 @@ def read_jsonl(path: str | Path) -> Iterator[ProxyNode]:
                 host=str(obj["host"]),
                 port=int(obj["port"]),
                 type=str(obj["type"]).lower(),  # type: ignore[arg-type]
-                country=str(obj.get("country", "XX")),
+                country=obj.get("country", "XX"),
                 latency_ms=int(obj.get("latency_ms", -1)),
             )
 
@@ -34,7 +34,7 @@ def write_jsonl(path: str | Path, nodes: Iterable[ProxyNode]) -> None:
                     {
                         "host": n.host,
                         "port": n.port,
-                        "type": n.type,
+                        "type": str(n.type),
                         "country": n.country,
                         "latency_ms": n.latency_ms,
                     },

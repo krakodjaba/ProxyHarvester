@@ -187,7 +187,7 @@ async def verify_all(
             print(f"[verify] {checked}/{total} checked, ok={len(ok_nodes)}", flush=True)
 
     await asyncio.gather(*(worker(n) for n in items), return_exceptions=True)
-    ok_nodes.sort(key=lambda x: x.latency_ms)
+    ok_nodes.sort(key=lambda x: (x.latency_ms, x.country))
     return ok_nodes
 
 

@@ -39,7 +39,7 @@ async def _fetch_list(url: str, ptype: ProxyType, timeout_s: float) -> set[Proxy
             continue
         if port < 1 or port > 65535:
             continue
-        out.add(ProxyNode(host=host, port=port, type=ptype, country="XX", latency_ms=-1))
+        out.add(ProxyNode(host=host, port=port, type=ptype))
     return out
 
 
