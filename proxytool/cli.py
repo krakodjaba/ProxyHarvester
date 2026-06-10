@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 from pathlib import Path
+import json
 
 from .harvester import harvest
 from .checker import check_all
@@ -10,7 +11,35 @@ from .io import read_jsonl, write_jsonl
 from .models import ProxyNode
 from .verifier import verify_all
 
+def export_raw_links_from_verified_jsonl(
+    src: str = "output/verified.jsonl",
+    dst: str = "output/raw.txt",
+) -> None:
+    Path("output").mkdir(exist_ok=True)
 
+    with open(src, "r", encoding="utf-8") as f_in, open(dst, "w", encoding="utf-8") as f_out:
+        for line in f_in:
+            line = line.strip()
+            if not line:
+                continue
+
+            obj = json.loads(line)
+
+            host = obj.get("host")
+            port = obj.get("port")
+            proto = (obj.get("type") or "http").lower()
+
+            if not host or not port:
+                continue
+
+            # нормализация протокола
+            if "socks" in proto:
+                scheme = "socks5"
+            else:
+                scheme = "http"
+
+            f_out.write(f"{scheme}://{host}:{port}\n")
+            
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="proxytool", add_help=True)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -140,8 +169,10 @@ async def _cmd_run(ns: argparse.Namespace) -> int:
         progress=True,
     )
     if ns.live_out:
-        write_jsonl(ns.live_out, live)
-        print(f"[run] wrote live={len(live)} to {ns.live_out}")
+        write_jsonl(ns.out, verified)
+        print(f"[run] wrote verified={len(verified)} to {ns.out}")
+        
+        export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
     else:
         print(f"[run] checked live={len(live)}")
 
