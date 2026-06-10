@@ -142,6 +142,7 @@ async def _cmd_verify(ns: argparse.Namespace) -> int:
     )
     write_jsonl(ns.out, ok)
     print(f"[verify] wrote {len(ok)} verified proxies to {ns.out}")
+    export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
     return 0
 
 
@@ -152,6 +153,7 @@ async def _cmd_run(ns: argparse.Namespace) -> int:
     if ns.raw_out:
         write_jsonl(ns.raw_out, raw)
         print(f"[run] wrote raw={len(raw)} to {ns.raw_out}")
+        export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
     else:
         print(f"[run] harvested raw={len(raw)}")
 
@@ -171,6 +173,7 @@ async def _cmd_run(ns: argparse.Namespace) -> int:
     if ns.live_out:
         write_jsonl(ns.out, verified)
         print(f"[run] wrote verified={len(verified)} to {ns.out}")
+        export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
         
         export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
     else:
@@ -189,6 +192,7 @@ async def _cmd_run(ns: argparse.Namespace) -> int:
         )
         write_jsonl(ns.out, verified)
         print(f"[run] wrote verified={len(verified)} to {ns.out}")
+        export_raw_links_from_verified_jsonl(ns.out, "output/raw.txt")
     else:
         write_jsonl(ns.out, live)
         print(f"[run] wrote live={len(live)} to {ns.out}")
