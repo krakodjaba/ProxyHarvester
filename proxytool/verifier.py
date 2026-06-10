@@ -187,7 +187,13 @@ async def verify_all(
             print(f"[verify] {checked}/{total} checked, ok={len(ok_nodes)}", flush=True)
 
     await asyncio.gather(*(worker(n) for n in items), return_exceptions=True)
-    ok_nodes.sort(key=lambda x: (x.latency_ms, x.country))
+    
+    def sort_key(x: ProxyNode):
+        latency = x.latency_ms if isinstance(x.latency_ms, (int, float)) else float("inf")
+        country = x.country if isinstance(x.country, str) else "ZZ"
+        return (latency, country)
+
+    ok_nodes.sort(key=sort_key)
     return ok_nodes
 
 
