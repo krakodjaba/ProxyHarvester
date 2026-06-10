@@ -5,6 +5,10 @@ on:
     - cron: "0 * * * *"
   workflow_dispatch:
 
+concurrency:
+  group: proxy-harvester
+  cancel-in-progress: false
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -14,14 +18,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: |
-          pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Harvest
         run: python -m proxytool harvest --out output/raw.jsonl
@@ -32,10 +37,14 @@ jobs:
       - name: Verify
         run: python -m proxytool verify --in output/live.jsonl --out output/verified.jsonl
 
-      - run: |
+      - name: Commit results
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/verified.jsonl
-          git add output/raw.txt
-          git commit -m "hourly update" || echo "no changes"
+
+          git add output/raw.txt output/verified.jsonl
+
+          git commit -m "hourly update" || exit 0
+
+          git pull --rebase origin main
           git push
